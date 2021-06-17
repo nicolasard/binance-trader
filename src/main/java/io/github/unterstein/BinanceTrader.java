@@ -4,13 +4,19 @@ import com.binance.api.client.domain.OrderStatus;
 import com.binance.api.client.domain.account.AssetBalance;
 import com.binance.api.client.domain.account.Order;
 import com.binance.api.client.domain.market.OrderBook;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
 import java.util.List;
 
+@Component
 public class BinanceTrader {
+
+  @Autowired
+  private LoginService loginService;
 
   private static Logger logger = LoggerFactory.getLogger(BinanceTrader.class);
 
@@ -25,7 +31,13 @@ public class BinanceTrader {
   private int panicSellCounter;
   private double trackingLastPrice;
 
-  BinanceTrader(double tradeDifference, double tradeProfit, int tradeAmount, String baseCurrency, String tradeCurrency, String key, String secret) {
+  BinanceTrader(@Value("${TRADE_DIFFERENCE:0.00000001}") double tradeDifference,
+                @Value("${TRADE_PROFIT:1.3}") double tradeProfit,
+                @Value("${TRADE_AMOUNT:150}") int tradeAmount,
+                @Value("${BASE_CURRENCY:XVG}") String baseCurrency,
+                @Value("${TRADE_CURRENCY:XVG}") String tradeCurrency,
+                @Value("${API_KEY}") String key,
+                @Value("${API_SECRET}") String secret) {
     client = new TradingClient(baseCurrency, tradeCurrency, key, secret);
     trackingLastPrice = client.lastPrice();
     this.tradeAmount = tradeAmount;
@@ -46,10 +58,10 @@ public class BinanceTrader {
       double buyPrice = lastBid + tradeDifference;
       double sellPrice = lastAsk - tradeDifference;
       double profitablePrice = buyPrice + (buyPrice * tradeProfit / 100);
-
-
-      logger.info(String.format("buyPrice:%.8f sellPrice:%.8f bid:%.8f ask:%.8f price:%.8f profit:%.8f diff:%.8f\n", buyPrice, sellPrice, lastAsk, lastAsk, lastPrice, profitablePrice, (lastAsk - profitablePrice)));
-
+      logger.info(String.format("buyPrice:%.8f sellPrice:%.8f bid:%.8f ask:%.8f price:%.8f profit:%.8f diff:%.8f", buyPrice, sellPrice, lastBid, lastAsk, lastPrice, profitablePrice, (lastAsk - profitablePrice)));
+      if(loginService.enabled) {
+        loginService.logIndicators(lastPrice);
+      }
       if (orderId == null) {
         logger.info("nothing bought, let`s check");
         // find a burst to buy
@@ -66,7 +78,7 @@ public class BinanceTrader {
             panicSellForCondition(lastPrice, lastKnownTradingBalance, client.tradingBalanceAvailable(tradingBalance));
           }
         } else {
-          logger.info(String.format("No profit detected, difference %.8f\n", lastAsk - profitablePrice));
+          logger.info(String.format("No profit detected, difference %.8f", lastAsk - profitablePrice));
           currentlyBoughtPrice = null;
           panicSellForCondition(lastPrice, lastKnownTradingBalance, client.tradingBalanceAvailable(tradingBalance));
         }

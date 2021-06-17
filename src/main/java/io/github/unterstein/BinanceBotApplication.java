@@ -3,7 +3,7 @@ package io.github.unterstein;
 import com.binance.api.client.domain.account.AssetBalance;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Value;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.scheduling.annotation.EnableScheduling;
@@ -22,33 +22,12 @@ public class BinanceBotApplication {
 
   private static Logger logger = LoggerFactory.getLogger(BinanceBotApplication.class);
 
+  @Autowired
   private BinanceTrader trader;
-
-  @Value("${TRADE_DIFFERENCE:0.00000001}")
-  private double tradeDifference;
-
-  @Value("${TRADE_PROFIT:1.3}")
-  private double tradeProfit;
-
-  @Value("${TRADE_AMOUNT:150}")
-  private int tradeAmount;
-
-  @Value("${BASE_CURRENCY:ETH}")
-  private String baseCurrency;
-
-  @Value("${TRADE_CURRENCY:XVG}")
-  private String tradeCurrency;
-
-  @Value("${API_KEY}")
-  private String apiKey;
-
-  @Value("${API_SECRET}")
-  private String apiSecret;
 
   @PostConstruct
   public void init() {
-    logger.info(String.format("Starting app with diff=%.8f, profit=%.8f amount=%d base=%s trade=%s", tradeDifference, tradeProfit, tradeAmount, baseCurrency, tradeCurrency));
-    trader = new BinanceTrader(tradeDifference, tradeProfit, tradeAmount, baseCurrency, tradeCurrency, apiKey, apiSecret);
+    logger.info(String.format("Starting app..."));
   }
 
   // tick every 3 seconds
