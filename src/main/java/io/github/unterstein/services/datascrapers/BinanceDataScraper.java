@@ -6,7 +6,6 @@ import io.github.unterstein.services.InfluxDbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -25,8 +24,7 @@ public class BinanceDataScraper {
 
   private static Logger logger = LoggerFactory.getLogger(BinanceDataScraper.class);
 
-  BinanceDataScraper(@Value("${BASE_CURRENCY:XVG}") String baseCurrency,
-                     @Value("${TRADE_CURRENCY:XVG}") String tradeCurrency) {
+  BinanceDataScraper() {
     logger.info("Starting Binance data scraper");
   }
 
@@ -38,9 +36,7 @@ public class BinanceDataScraper {
       if(loginService.enabled) {
         loginService.logIndicators(lastPrice);
       }
-
       client.getOrderBook("ETHUSDT");
-
     } catch (Exception e) {
       logger.error("Unable to scrap all the data", e);
     }
