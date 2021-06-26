@@ -19,7 +19,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
-import javax.annotation.PostConstruct;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -33,17 +32,13 @@ public class BinanceService {
   private BinanceApiRestClient client;
 
   @Value("${BINANCE_KEY}")
-  String binanceKey;
+  private String binanceKey;
 
   @Value("${BINANCE_SECRET}")
-  String binanceSecret;
+  private String binanceSecret;
 
   public BinanceService() {
     logger.info("Creating BinanceService...");
-  }
-
-  @PostConstruct
-  private void initializeService(){
       if(this.client == null) {
           final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
           this.client = factory.newRestClient();
