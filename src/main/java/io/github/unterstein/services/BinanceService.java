@@ -34,7 +34,9 @@ public class BinanceService {
   public BinanceService(@Value("${BINANCE_KEY}") String binanceKey,
                         @Value("${BINANCE_SECRET}") String binanceSecret) {
       final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
-      this.client = factory.newRestClient();
+      if (this.client==null){
+          this.client = factory.newRestClient();
+      }
   }
 
   // The bid price represents the maximum price that a buyer is willing to pay for a security.
