@@ -18,9 +18,9 @@ public class InfluxDbService {
 
     private static Logger logger = LoggerFactory.getLogger(InfluxDbService.class);
 
-    public static Boolean enabled;
+    public Boolean enabled;
 
-    private static InfluxDB influxDB;
+    private InfluxDB influxDB;
 
     public InfluxDbService(@Value("${INFLUXDB_URL}") String influxUrl,
                            @Value("${INFLUXDB_DATABASE}") String influxDatabase,
