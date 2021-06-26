@@ -13,14 +13,12 @@ import com.binance.api.client.domain.account.request.CancelOrderRequest;
 import com.binance.api.client.domain.account.request.OrderRequest;
 import com.binance.api.client.domain.account.request.OrderStatusRequest;
 import com.binance.api.client.domain.market.OrderBook;
-import com.binance.api.client.domain.market.OrderBookEntry;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 /*
  *  Class used to work with Binance
@@ -39,18 +37,16 @@ public class BinanceService {
 
   public BinanceService() {
     logger.info("Creating BinanceService...");
-      if(this.client == null) {
-          final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
-          this.client = factory.newRestClient();
-      }
+    if(this.binanceKey==null || this.binanceSecret == null){
+        logger.warn("Warning binance key and secret are null");
+    }
+    final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
+    this.client = factory.newRestClient();
   }
 
   // The bid price represents the maximum price that a buyer is willing to pay for a security.
   // The ask price represents the minimum price that a seller is willing to receive.
   public OrderBook getOrderBook(String symbol) {
-      OrderBook orderBook = client.getOrderBook(symbol, 400);
-      List<OrderBookEntry> orderAsks = orderBook.getAsks();
-      List<String> orderBids = orderBook.getBids().stream().map(s ->s.getPrice()).collect(Collectors.toList());
       return client.getOrderBook(symbol, 400);
   }
 
