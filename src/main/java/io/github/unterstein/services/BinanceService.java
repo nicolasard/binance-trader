@@ -1,4 +1,4 @@
-package io.github.unterstein;
+package io.github.unterstein.services;
 
 import com.binance.api.client.BinanceApiClientFactory;
 import com.binance.api.client.BinanceApiRestClient;
@@ -15,36 +15,46 @@ import com.binance.api.client.domain.account.request.OrderStatusRequest;
 import com.binance.api.client.domain.market.OrderBook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Service;
 
 import java.util.List;
 
-public class TradingClient {
-  private static Logger logger = LoggerFactory.getLogger(TradingClient.class);
+/*
+ *  Class used to work with Binance
+ */
+@Service
+public class BinanceService {
 
+  private static Logger logger = LoggerFactory.getLogger(BinanceService.class);
   private BinanceApiRestClient client;
-  private String baseCurrency;
-  private String tradeCurrency;
-  private String symbol;
 
-  TradingClient(String baseCurrency, String tradeCurrency, String key, String secret) {
-    this.baseCurrency = baseCurrency;
-    this.tradeCurrency = tradeCurrency;
-    BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(key, secret);
-    client = factory.newRestClient();
-    symbol = tradeCurrency + baseCurrency;
+  @Value("${BINANCE_KEY}")
+  private String binanceKey;
+
+  @Value("${BINANCE_SECRET}")
+  private String binanceSecret;
+
+  public BinanceService() {
+    logger.info("Creating BinanceService...");
+    if(this.binanceKey==null || this.binanceSecret == null){
+        logger.warn("Warning binance key and secret are null");
+    }
+    final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
+    this.client = factory.newRestClient();
   }
 
   // The bid price represents the maximum price that a buyer is willing to pay for a security.
   // The ask price represents the minimum price that a seller is willing to receive.
-  public OrderBook getOrderBook() {
-    return client.getOrderBook(symbol, 5);
+  public OrderBook getOrderBook(String symbol) {
+      return client.getOrderBook(symbol, 400);
   }
 
-  public AssetBalance getBaseBalance() {
+  public AssetBalance getBaseBalance(String baseCurrency) {
     return client.getAccount().getAssetBalance(baseCurrency);
   }
 
-  public AssetBalance getTradingBalance() {
+  public AssetBalance getTradingBalance(String tradeCurrency) {
     return client.getAccount().getAssetBalance(tradeCurrency);
   }
 
@@ -52,8 +62,8 @@ public class TradingClient {
     return Double.valueOf(balance.getFree()) + Double.valueOf(balance.getLocked());
   }
 
-  public double getAllTradingBalance() {
-    AssetBalance tradingBalance = getTradingBalance();
+  public double getAllTradingBalance(String tradeCurrency) {
+    AssetBalance tradingBalance = getTradingBalance(tradeCurrency);
     return assetBalanceToDouble(tradingBalance);
   }
 
@@ -65,32 +75,32 @@ public class TradingClient {
     return client.getAccount().getBalances();
   }
 
-  public List<Order> getOpenOrders() {
+  public List<Order> getOpenOrders(String symbol) {
     OrderRequest request = new OrderRequest(symbol);
     return client.getOpenOrders(request);
   }
 
-  public void cancelAllOrders() {
-    getOpenOrders().forEach(order -> client.cancelOrder(new CancelOrderRequest(symbol, order.getOrderId())));
+  public void cancelAllOrders(String symbol) {
+    getOpenOrders(symbol).forEach(order -> client.cancelOrder(new CancelOrderRequest(symbol, order.getOrderId())));
   }
 
   // * GTC (Good-Til-Canceled) orders are effective until they are executed or canceled.
   // * IOC (Immediate or Cancel) orders fills all or part of an order immediately and cancels the remaining part of the order.
-  public NewOrderResponse buy(int quantity, double price) {
+  public NewOrderResponse buy(String symbol,int quantity, double price) {
     String priceString = String.format("%.8f", price).replace(",", ".");
     logger.info(String.format("Buying %d for %s\n", quantity, priceString));
     NewOrder order = new NewOrder(symbol, OrderSide.BUY, OrderType.LIMIT, TimeInForce.GTC, "" + quantity, priceString);
     return client.newOrder(order);
   }
 
-  public void sell(int quantity, double price) {
+  public void sell(String symbol,int quantity, double price) {
     String priceString = String.format("%.8f", price).replace(",", ".");
     logger.info(String.format("Selling %d for %s\n", quantity, priceString));
     NewOrder order = new NewOrder(symbol, OrderSide.SELL, OrderType.LIMIT, TimeInForce.GTC, "" + quantity, priceString);
     client.newOrder(order);
   }
 
-  public void sellMarket(int quantity) {
+  public void sellMarket(String symbol,int quantity) {
     if (quantity > 0) {
       logger.info("Selling to MARKET with quantity " + quantity);
       NewOrder order = new NewOrder(symbol, OrderSide.SELL, OrderType.MARKET, null, "" + quantity);
@@ -100,23 +110,23 @@ public class TradingClient {
     }
   }
 
-  public Order getOrder(long orderId) {
+  public Order getOrder(String symbol,long orderId) {
     return client.getOrderStatus(new OrderStatusRequest(symbol, orderId));
   }
 
-  public double lastPrice() {
+  public double lastPrice(String symbol) {
     return Double.valueOf(client.get24HrPriceStatistics(symbol).getLastPrice());
   }
 
-  public void cancelOrder(long orderId) {
+  public void cancelOrder(String symbol,long orderId) {
     logger.info("Cancelling order " + orderId);
     client.cancelOrder(new CancelOrderRequest(symbol, orderId));
   }
 
-  public void panicSell(double lastKnownAmount, double lastKnownPrice) {
+  public void panicSell(String symbol, double lastKnownAmount, double lastKnownPrice) {
     logger.error("!!!! PANIC SELL !!!!");
     logger.warn(String.format("Probably selling %.8f for %.8f", lastKnownAmount, lastKnownPrice));
-    cancelAllOrders();
-    sellMarket(Double.valueOf(getTradingBalance().getFree()).intValue());
+    cancelAllOrders(symbol);
+    sellMarket(symbol,Double.valueOf(getTradingBalance("fsf").getFree()).intValue());
   }
 }
