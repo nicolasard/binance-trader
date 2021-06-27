@@ -10,10 +10,13 @@ on:
     branches: [ master ]
 
 jobs:
+  deploy:
+    runs-on: self-hosted
+    steps:
+      - name: Copy generated .Jar
+        run: echo "Hola Mundo"
   build:
-
-    runs-on: ubuntu-latest
-
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
@@ -21,5 +24,10 @@ jobs:
       with:
         java-version: '11'
         distribution: 'adopt'
+    - name: Set up Maven
+      uses: stCarolas/setup-maven@v4
+      with:
+        maven-version: 3.5.4
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
