@@ -10,7 +10,12 @@
 
     <name>binancebot</name>
     <description>Yet another stupid trading bot</description>
-
+    <repositories>
+        <repository>
+            <id>local-maven-repo</id>
+            <url>file:///${basedir}/libs</url>
+        </repository>
+    </repositories>
     <parent>
         <groupId>org.springframework.boot</groupId>
         <artifactId>spring-boot-starter-parent</artifactId>
@@ -40,8 +45,6 @@
             <groupId>com.binance.api</groupId>
             <artifactId>binance-api-client</artifactId>
             <version>1.0.1</version>
-            <scope>system</scope>
-            <systemPath>${basedir}/libs/binance-api-client-1.0.1.jar</systemPath>
         </dependency>
         <dependency>
             <groupId>org.influxdb</groupId>
