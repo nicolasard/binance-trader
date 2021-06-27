@@ -14,6 +14,8 @@
         <repository>
             <id>local-maven-repo</id>
             <url>file:///${basedir}/libs</url>
+            <releases><enabled>true</enabled><updatePolicy>always</updatePolicy></releases>
+            <snapshots><enabled>true</enabled><updatePolicy>always</updatePolicy></snapshots>
         </repository>
     </repositories>
     <parent>
