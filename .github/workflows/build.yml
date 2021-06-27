@@ -10,10 +10,13 @@ on:
     branches: [ master ]
 
 jobs:
-  build:
-
+  deploy:
     runs-on: self-hosted
-
+    steps:
+      - name: Copy generated .Jar
+        run: echo "Hola Mundo"
+  build:
+    runs-on: self-hosted
     steps:
     - uses: actions/checkout@v2
     - name: Set up JDK 11
@@ -27,3 +30,4 @@ jobs:
         maven-version: 3.5.4
     - name: Build with Maven
       run: mvn -B package --file pom.xml
+
