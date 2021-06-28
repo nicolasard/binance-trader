@@ -10,11 +10,6 @@ on:
     branches: [ master ]
 
 jobs:
-  deploy:
-    runs-on: self-hosted
-    steps:
-      - name: Copy generated .Jar
-        run: echo "Hola Mundo"
   build:
     runs-on: self-hosted
     steps:
