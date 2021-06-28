@@ -25,4 +25,12 @@ jobs:
         maven-version: 3.5.4
     - name: Build with Maven
       run: mvn -B clean package --file pom.xml
-
+  deploy:
+    runs-on: self-hosted
+    steps:
+    - name: Stop Application
+      run: systemctl stop binancebot.service
+    - name: Copy generated .Jar
+      run: ls
+    - name: Start Application
+      run: systemctl start binancebot.service
