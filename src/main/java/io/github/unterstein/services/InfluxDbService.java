@@ -20,7 +20,7 @@ public class InfluxDbService {
 
     public Boolean enabled;
 
-    private InfluxDB influxDB;
+    private static InfluxDB influxDB;
 
     public InfluxDbService(@Value("${INFLUXDB_URL}") String influxUrl,
                            @Value("${INFLUXDB_DATABASE}") String influxDatabase,

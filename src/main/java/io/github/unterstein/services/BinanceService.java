@@ -27,7 +27,7 @@ import java.util.List;
 public class BinanceService {
 
   private static Logger logger = LoggerFactory.getLogger(BinanceService.class);
-  private BinanceApiRestClient client;
+  private static BinanceApiRestClient client;
 
   @Value("${BINANCE_KEY}")
   private String binanceKey;
@@ -36,12 +36,14 @@ public class BinanceService {
   private String binanceSecret;
 
   public BinanceService() {
-    logger.info("Creating BinanceService...");
-    if(this.binanceKey==null || this.binanceSecret == null){
-        logger.warn("Warning binance key and secret are null");
+    if (this.client == null) {
+        logger.info("Creating BinanceService...");
+        if (this.binanceKey == null || this.binanceSecret == null) {
+            logger.warn("Warning binance key and secret are null");
+        }
+        final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
+        this.client = factory.newRestClient();
     }
-    final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
-    this.client = factory.newRestClient();
   }
 
   // The bid price represents the maximum price that a buyer is willing to pay for a security.
