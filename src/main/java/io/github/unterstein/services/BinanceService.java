@@ -36,14 +36,19 @@ public class BinanceService {
   private String binanceSecret;
 
   public BinanceService() {
-    if (this.client == null) {
-        logger.info("Creating BinanceService...");
-        if (this.binanceKey == null || this.binanceSecret == null) {
-            logger.warn("Warning binance key and secret are null");
-        }
-        final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
-        this.client = factory.newRestClient();
-    }
+    this.initUsingSystemProperties();
+  }
+
+  public synchronized void initUsingSystemProperties(){
+          logger.info("Initializing Binance Service");
+          if (this.binanceKey.isEmpty() || this.binanceSecret.isEmpty()){
+              this.binanceKey=System.getProperty("BINANCE_KEY");
+              this.binanceSecret=System.getProperty("BINANCE_SECRET");
+          }
+          if (this.client==null){
+              final BinanceApiClientFactory factory = BinanceApiClientFactory.newInstance(binanceKey, binanceSecret);
+              this.client = factory.newRestClient();
+          }
   }
 
   // The bid price represents the maximum price that a buyer is willing to pay for a security.
