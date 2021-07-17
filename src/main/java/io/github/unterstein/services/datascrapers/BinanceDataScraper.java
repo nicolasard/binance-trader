@@ -6,6 +6,7 @@ import io.github.unterstein.services.InfluxDbService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
@@ -33,9 +34,7 @@ public class BinanceDataScraper {
     try {
       lastPrice = client.lastPrice("ETHUSDT");
       logger .debug(String.format("Last price:%s",lastPrice));
-      if(loginService.enabled) {
-        loginService.logIndicators(lastPrice);
-      }
+      loginService.logIndicators(lastPrice);
       client.getOrderBook("ETHUSDT");
     } catch (Exception e) {
       logger.error("Unable to scrap all the data", e);
@@ -44,5 +43,11 @@ public class BinanceDataScraper {
 
   public List<AssetBalance> getBalances() {
     return client.getBalances();
+  }
+
+  // tick every 3 seconds
+  @Scheduled(fixedRate = 5000)
+  public void schedule() {
+    this.tick();
   }
 }
