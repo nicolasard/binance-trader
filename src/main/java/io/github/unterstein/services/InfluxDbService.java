@@ -24,19 +24,16 @@ public class InfluxDbService {
     private static InfluxDB influxDB;
 
     @Value("${influxdb.url}")
-    String influxUrl;
+    private String influxUrl;
 
     @Value("${influxdb.database}")
-    String influxDatabase;
+    private String influxDatabase;
 
     @Value("${influxdb.user}")
-    String influxUser;
+    private String influxUser;
 
     @Value("${influxdb.pass}")
-    String influxPass;
-
-    public InfluxDbService(){
-    }
+    private String influxPass;
 
     @PostConstruct
     public synchronized void initUsingSystemProperties(){

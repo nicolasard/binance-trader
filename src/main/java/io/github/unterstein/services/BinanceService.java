@@ -32,9 +32,6 @@ public class BinanceService {
   @Value("${binance.secret}")
   private String binanceSecret;
 
-  public BinanceService() {
-  }
-
   @PostConstruct
   public synchronized void initUsingSystemProperties(){
           logger.info("Initializing Binance Service");
